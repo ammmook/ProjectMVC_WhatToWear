@@ -238,8 +238,7 @@ public class StyleController {
 
 	    return mav;
 	}
-	
-	// วางทับเมธอด matchStyles เดิมของคุณ
+
 	@RequestMapping(value = "matchstyles", method = RequestMethod.POST)
 	public ModelAndView matchStyles(HttpSession session, HttpServletRequest request) {
 	    ModelAndView mav = new ModelAndView("showstyles_page");
@@ -247,784 +246,308 @@ public class StyleController {
 	    if (user == null) {
 	        return new ModelAndView("redirect:/logout");
 	    }
+
+	    // --- Part 1: Session Data & User Input Processing ---
+	    clearSessionAttributes(session);
 	    
-	    // --- โค้ดส่วนต้นของเมธอด (การดึงข้อมูลและจัดกลุ่มเสื้อผ้า) ยังคงเหมือนเดิม ---
-	    List<MatchStyle> matchedStylesSession = (List<MatchStyle>) session.getAttribute("matchedStyles");
-	    List<ClothingItem> selectedClothSession = (List<ClothingItem>) session.getAttribute("selectedCloth");
-	    
-	    if (matchedStylesSession != null) {
-	        session.removeAttribute("matchedStyles");
-	        if (selectedClothSession != null) {
-	            session.removeAttribute("selectedCloth");
-	        }
-	    }
-	    
-	    List<String> currentSelection = (List<String>) session.getAttribute("selectedClothes");
+	    Map<String, List<String>> selectedClothesMap = getOrCreateSelectedClothesMap(session);
 	    String formalityTypeId = request.getParameter("formality_type");
-
-	    Map<String, List<String>> selectedClothesMap = (Map<String, List<String>>) session.getAttribute("selectedClothesMap");
-	    if (selectedClothesMap == null) {
-	        selectedClothesMap = new HashMap<>();
-	    }
-
-	    String currentCategory = (String) session.getAttribute("selectedCates");
-	    if (currentCategory == null) {
-	        currentCategory = "CG001";
-	    }
-	    
-	    selectedClothesMap.put(currentCategory, currentSelection);
-	    session.setAttribute("selectedClothesMap", selectedClothesMap);
 
 	    List<String> allSelectedClothesIds = new ArrayList<>();
 	    for (List<String> clothesList : selectedClothesMap.values()) {
 	        allSelectedClothesIds.addAll(clothesList);
 	    }
-
+	    boolean hasSelectedClothes = !allSelectedClothesIds.isEmpty();
 	    String[] selectedClothesIds = allSelectedClothesIds.toArray(new String[0]);
-	    
-	    boolean hasSelectedClothes = false;
-	    if (selectedClothesIds != null && selectedClothesIds.length > 0) {
-	        hasSelectedClothes = true;
-	    }
-	    
+
 	    ClothingManager cm = new ClothingManager();
 	    StyleManager sm = new StyleManager();
-	    List<ClothingItem> selectedClothes;
-	    
-	    if (hasSelectedClothes) {
-	        selectedClothes = cm.getClothingItemsByIds(selectedClothesIds, user.getEmail());
-	    } else {
-	        selectedClothes = cm.getClothesByEmail(user.getEmail());
-	    }
-	    
+	    List<ClothingItem> selectedClothes = hasSelectedClothes ? cm.getClothingItemsByIds(selectedClothesIds, user.getEmail()) : cm.getClothesByEmail(user.getEmail());
 	    List<ClothingItem> allUserClothes = cm.getClothesByEmail(user.getEmail());
-	    
-	    List<ClothingItem> selectedFormalTops = new ArrayList<>();
-	    List<ClothingItem> selectedSemiFormalTops = new ArrayList<>();
-	    List<ClothingItem> selectedCasualTops = new ArrayList<>();
-	    List<ClothingItem> selectedFormalBottoms = new ArrayList<>();
-	    List<ClothingItem> selectedSemiFormalBottoms = new ArrayList<>();
-	    List<ClothingItem> selectedCasualBottoms = new ArrayList<>();
-	    List<ClothingItem> selectedFormalDresses = new ArrayList<>();
-	    List<ClothingItem> selectedSemiFormalDresses = new ArrayList<>();
-	    List<ClothingItem> selectedCasualDresses = new ArrayList<>();
-	    List<ClothingItem> selectedFormalOuterwears = new ArrayList<>();
-	    List<ClothingItem> selectedSemiFormalOuterwears = new ArrayList<>();
-	    List<ClothingItem> selectedCasualOuterwears = new ArrayList<>();
-	    
-	    List<ClothingItem> allFormalTops = new ArrayList<>();
-	    List<ClothingItem> allSemiFormalTops = new ArrayList<>();
-	    List<ClothingItem> allCasualTops = new ArrayList<>();
-	    List<ClothingItem> allFormalBottoms = new ArrayList<>();
-	    List<ClothingItem> allSemiFormalBottoms = new ArrayList<>();
-	    List<ClothingItem> allCasualBottoms = new ArrayList<>();
-	    List<ClothingItem> allFormalOuterwears = new ArrayList<>();
-	    List<ClothingItem> allSemiFormalOuterwears = new ArrayList<>();
-	    List<ClothingItem> allCasualOuterwears = new ArrayList<>();
-	    
-	    if (!hasSelectedClothes) {
-	        for (ClothingItem item : allUserClothes) {
-	            String categoryId = item.getSubCategory().getCategory().getCategoryId();
-	            String formalityId = item.getFormalityType().getTypeId();
-	            if ("CG001".equals(categoryId)) { //Top
-	                if ("T01".equals(formalityId)) selectedFormalTops.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalTops.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualTops.add(item);
-	            } else if ("CG002".equals(categoryId)) { //Bottom
-	                if ("T01".equals(formalityId)) selectedFormalBottoms.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalBottoms.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualBottoms.add(item);
-	            } else if ("CG003".equals(categoryId)) { //Dress
-	                if ("T01".equals(formalityId)) selectedFormalDresses.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalDresses.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualDresses.add(item);
-	            }  else if ("CG004".equals(categoryId)) { //Outwear
-	                if ("T01".equals(formalityId)) selectedFormalOuterwears.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalOuterwears.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualOuterwears.add(item);
-	            }
-	        }
-	    }
 
-	    for (ClothingItem item : selectedClothes) {
-	        try {
-	            String categoryId = item.getSubCategory().getCategory().getCategoryId();
-	            String formalityId = item.getFormalityType().getTypeId();
-	            if ("CG001".equals(categoryId)) { // Top
-	                if ("T01".equals(formalityId)) selectedFormalTops.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalTops.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualTops.add(item);
-	            } else if ("CG002".equals(categoryId)) { // Bottom
-	                if ("T01".equals(formalityId)) selectedFormalBottoms.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalBottoms.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualBottoms.add(item);
-	            } else if ("CG003".equals(categoryId)) { // Dress
-	                if ("T01".equals(formalityId)) selectedFormalDresses.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalDresses.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualDresses.add(item);
-	            } else if ("CG004".equals(categoryId)) { // Outerwear
-	                if ("T01".equals(formalityId)) selectedFormalOuterwears.add(item);
-	                else if ("T02".equals(formalityId)) selectedSemiFormalOuterwears.add(item);
-	                else if ("T03".equals(formalityId)) selectedCasualOuterwears.add(item);
-	            }
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+	    // --- Part 2: Categorize Clothing Items ---
+	    Map<String, List<ClothingItem>> selectedItemsByFormality = categorizeClothes(selectedClothes);
+	    Map<String, List<ClothingItem>> allItemsByFormality = categorizeClothes(allUserClothes);
+	    
+	    List<ClothingItem> selectedFormalTops = selectedItemsByFormality.getOrDefault("T01_CG001", new ArrayList<>());
+	    List<ClothingItem> selectedSemiFormalTops = selectedItemsByFormality.getOrDefault("T02_CG001", new ArrayList<>());
+	    List<ClothingItem> selectedCasualTops = selectedItemsByFormality.getOrDefault("T03_CG001", new ArrayList<>());
+	    List<ClothingItem> selectedFormalBottoms = selectedItemsByFormality.getOrDefault("T01_CG002", new ArrayList<>());
+	    List<ClothingItem> selectedSemiFormalBottoms = selectedItemsByFormality.getOrDefault("T02_CG002", new ArrayList<>());
+	    List<ClothingItem> selectedCasualBottoms = selectedItemsByFormality.getOrDefault("T03_CG002", new ArrayList<>());
+	    List<ClothingItem> selectedFormalDresses = selectedItemsByFormality.getOrDefault("T01_CG003", new ArrayList<>());
+	    List<ClothingItem> selectedSemiFormalDresses = selectedItemsByFormality.getOrDefault("T02_CG003", new ArrayList<>());
+	    List<ClothingItem> selectedCasualDresses = selectedItemsByFormality.getOrDefault("T03_CG003", new ArrayList<>());
+	    List<ClothingItem> selectedFormalOuterwears = selectedItemsByFormality.getOrDefault("T01_CG004", new ArrayList<>());
+	    List<ClothingItem> selectedSemiFormalOuterwears = selectedItemsByFormality.getOrDefault("T02_CG004", new ArrayList<>());
+	    List<ClothingItem> selectedCasualOuterwears = selectedItemsByFormality.getOrDefault("T03_CG004", new ArrayList<>());
+	    
+	    List<ClothingItem> allFormalTops = allItemsByFormality.getOrDefault("T01_CG001", new ArrayList<>());
+	    List<ClothingItem> allSemiFormalTops = allItemsByFormality.getOrDefault("T02_CG001", new ArrayList<>());
+	    List<ClothingItem> allCasualTops = allItemsByFormality.getOrDefault("T03_CG001", new ArrayList<>());
+	    List<ClothingItem> allFormalBottoms = allItemsByFormality.getOrDefault("T01_CG002", new ArrayList<>());
+	    List<ClothingItem> allSemiFormalBottoms = allItemsByFormality.getOrDefault("T02_CG002", new ArrayList<>());
+	    List<ClothingItem> allCasualBottoms = allItemsByFormality.getOrDefault("T03_CG002", new ArrayList<>());
+	    List<ClothingItem> allFormalOuterwears = allItemsByFormality.getOrDefault("T01_CG004", new ArrayList<>());
+	    List<ClothingItem> allSemiFormalOuterwears = allItemsByFormality.getOrDefault("T02_CG004", new ArrayList<>());
+	    List<ClothingItem> allCasualOuterwears = allItemsByFormality.getOrDefault("T03_CG004", new ArrayList<>());
+	    
+	    // If no clothes were manually selected, categorize all user clothes.
+	    if (!hasSelectedClothes) {
+	        selectedFormalTops.addAll(allFormalTops);
+	        selectedSemiFormalTops.addAll(allSemiFormalTops);
+	        selectedCasualTops.addAll(allCasualTops);
+	        selectedFormalBottoms.addAll(allFormalBottoms);
+	        selectedSemiFormalBottoms.addAll(allSemiFormalBottoms);
+	        selectedCasualBottoms.addAll(allCasualBottoms);
+	        selectedFormalDresses.addAll(selectedItemsByFormality.getOrDefault("T01_CG003", new ArrayList<>()));
+	        selectedSemiFormalDresses.addAll(selectedItemsByFormality.getOrDefault("T02_CG003", new ArrayList<>()));
+	        selectedCasualDresses.addAll(selectedItemsByFormality.getOrDefault("T03_CG003", new ArrayList<>()));
+	        selectedFormalOuterwears.addAll(allFormalOuterwears);
+	        selectedSemiFormalOuterwears.addAll(allSemiFormalOuterwears);
+	        selectedCasualOuterwears.addAll(allCasualOuterwears);
 	    }
 	    
-	    for (ClothingItem item : allUserClothes) {
-	        try {
-	            String categoryId = item.getSubCategory().getCategory().getCategoryId();
-	            String formalityId = item.getFormalityType().getTypeId();
-	            if ("CG001".equals(categoryId)) { // Top
-	                if ("T01".equals(formalityId)) allFormalTops.add(item);
-	                else if ("T02".equals(formalityId)) allSemiFormalTops.add(item);
-	                else if ("T03".equals(formalityId)) allCasualTops.add(item);
-	            } else if ("CG002".equals(categoryId)) { // Bottom
-	                if ("T01".equals(formalityId)) allFormalBottoms.add(item);
-	                else if ("T02".equals(formalityId)) allSemiFormalBottoms.add(item);
-	                else if ("T03".equals(formalityId)) allCasualBottoms.add(item);
-	            } else if ("CG004".equals(categoryId)) { // Outerwear
-	                if ("T01".equals(formalityId)) allFormalOuterwears.add(item);
-	                else if ("T02".equals(formalityId)) allSemiFormalOuterwears.add(item);
-	                else if ("T03".equals(formalityId)) allCasualOuterwears.add(item);
-	            }
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
-	    }
-	   
-	    // --- โค้ดส่วนสร้างชุด (Matching Logic) ที่แก้ไขแล้ว ---
+	    // --- Part 3: Matching Logic ---
 	    List<MatchStyle> matchedStyles = new ArrayList<>();
 	    FormalityType formalityType = sm.getFormalityTypeById(formalityTypeId);
-	    
-	    // Rule 1: Formal (T01) Combinations
+
 	    if ("T01".equals(formalityTypeId)) {
-	        // 1. Top(Formal) + Bottom(Formal)
-	        for (ClothingItem selectedTop : selectedFormalTops) {
-	            for (ClothingItem bottom : allFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedFormalBottoms) {
-	            for (ClothingItem top : allFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 2. Top(Formal) + Bottom(Formal) + Outerwear(Formal)
-	        for (ClothingItem selectedTop : selectedFormalTops) {
-	            for (ClothingItem bottom : allFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : allFormalOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedFormalBottoms) {
-	            for (ClothingItem top : allFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : allFormalOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-
-	        // 3. Dress(Formal) + Outerwear(Formal)
-	        for (ClothingItem selectedDress : selectedFormalDresses) {
-	            for (ClothingItem outerwear : allFormalOuterwears) {
-	                if (selectedDress.getClothid().equals(outerwear.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedDress);
-	                potentialStyle.getClothingItems().add(outerwear);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	    }
-
-	    // Rule 2: Semi-formal (T02) Combinations
-	    else if ("T02".equals(formalityTypeId)) {
-	        List<ClothingItem> validOuterwears = new ArrayList<>();
-	        validOuterwears.addAll(allFormalOuterwears);
-	        validOuterwears.addAll(allSemiFormalOuterwears);
-	        
-	        // 1. Top(Formal) + Bottom(Semi-formal)
-	        for (ClothingItem selectedTop : selectedFormalTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                 if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allFormalTops) {
-	                 if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 2. Top(Semi-formal) + Bottom(Formal)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allFormalBottoms) {
-	                 if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedFormalBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                 if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 3. Top(Semi-formal) + Bottom(Semi-formal)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                 if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                 if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 4. Top(F) + Bottom(S) + Outerwear(F/S)
-	        for (ClothingItem selectedTop : selectedFormalTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 5. Top(S) + Bottom(F) + Outerwear(F/S)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedFormalBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 6. Top(S) + Bottom(S) + Outerwear(F/S)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 7. Dress(S) + Outerwear(F/S)
-	        for (ClothingItem selectedDress : selectedSemiFormalDresses) {
-	            for (ClothingItem outerwear : validOuterwears) {
-	                if (selectedDress.getClothid().equals(outerwear.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedDress);
-	                potentialStyle.getClothingItems().add(outerwear);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	    }
-
-	    // Rule 3: Casual (T03) Combinations
-	    else if ("T03".equals(formalityTypeId)) {
-	        List<ClothingItem> validOuterwears = new ArrayList<>();
-	        validOuterwears.addAll(allSemiFormalOuterwears);
-	        validOuterwears.addAll(allCasualOuterwears);
-	        
-	        // 1. Top(S) + Bottom(C)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allCasualBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedCasualBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 2. Top(C) + Bottom(S)
-	        for (ClothingItem selectedTop : selectedCasualTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allCasualTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 3. Top(C) + Bottom(C)
-	        for (ClothingItem selectedTop : selectedCasualTops) {
-	            for (ClothingItem bottom : allCasualBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedTop);
-	                potentialStyle.getClothingItems().add(bottom);
-	                if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                    matchedStyles.add(potentialStyle);
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedCasualBottoms) {
-	            for (ClothingItem top : allCasualTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(top);
-	                potentialStyle.getClothingItems().add(selectedBottom);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 4. Top(S) + Bottom(C) + Outerwear(S/C)
-	        for (ClothingItem selectedTop : selectedSemiFormalTops) {
-	            for (ClothingItem bottom : allCasualBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedCasualBottoms) {
-	            for (ClothingItem top : allSemiFormalTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 5. Top(C) + Bottom(S) + Outerwear(S/C)
-	        for (ClothingItem selectedTop : selectedCasualTops) {
-	            for (ClothingItem bottom : allSemiFormalBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedSemiFormalBottoms) {
-	            for (ClothingItem top : allCasualTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 6. Top(C) + Bottom(C) + Outerwear(S/C)
-	        for (ClothingItem selectedTop : selectedCasualTops) {
-	            for (ClothingItem bottom : allCasualBottoms) {
-	                if (selectedTop.getClothid().equals(bottom.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (selectedTop.getClothid().equals(outerwear.getClothid()) || bottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(selectedTop);
-	                    potentialStyle.getClothingItems().add(bottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        for (ClothingItem selectedBottom : selectedCasualBottoms) {
-	            for (ClothingItem top : allCasualTops) {
-	                if (selectedBottom.getClothid().equals(top.getClothid())) continue;
-	                for (ClothingItem outerwear : validOuterwears) {
-	                    if (top.getClothid().equals(outerwear.getClothid()) || selectedBottom.getClothid().equals(outerwear.getClothid())) continue;
-	                    MatchStyle potentialStyle = new MatchStyle();
-	                    potentialStyle.setFormalityType(formalityType);
-	                    potentialStyle.getClothingItems().add(top);
-	                    potentialStyle.getClothingItems().add(selectedBottom);
-	                    potentialStyle.getClothingItems().add(outerwear);
-	                    
-	                    if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                        // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                        if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                            matchedStyles.add(potentialStyle);
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 7. Dress(S) + Outerwear(S/C)
-	        for (ClothingItem selectedDress : selectedSemiFormalDresses) {
-	            for (ClothingItem outerwear : validOuterwears) {
-	                if (selectedDress.getClothid().equals(outerwear.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedDress);
-	                potentialStyle.getClothingItems().add(outerwear);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
-	        
-	        // 8. Dress(C) + Outerwear(S/C)
-	        for (ClothingItem selectedDress : selectedCasualDresses) {
-	            for (ClothingItem outerwear : validOuterwears) {
-	                if (selectedDress.getClothid().equals(outerwear.getClothid())) continue;
-	                MatchStyle potentialStyle = new MatchStyle();
-	                potentialStyle.setFormalityType(formalityType);
-	                potentialStyle.getClothingItems().add(selectedDress);
-	                potentialStyle.getClothingItems().add(outerwear);
-	                
-	                if (!sm.isStyleAlreadyFavorited(potentialStyle, user.getEmail())) {
-	                    // 2. เช็คว่าเพิ่งสร้างซ้ำในรอบนี้หรือไม่ (A+B vs B+A)
-	                    if (!isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
-	                        matchedStyles.add(potentialStyle);
-	                    }
-	                }
-	            }
-	        }
+	        matchFormalStyles(selectedFormalTops, selectedFormalBottoms, selectedFormalDresses,
+	            allFormalTops, allFormalBottoms, allFormalOuterwears, matchedStyles, formalityType, sm, user.getEmail());
+	    } else if ("T02".equals(formalityTypeId)) {
+	        matchSemiFormalStyles(selectedFormalTops, selectedSemiFormalTops, selectedFormalBottoms, selectedSemiFormalBottoms,
+	            selectedSemiFormalDresses, allFormalTops, allSemiFormalTops, allFormalBottoms, allSemiFormalBottoms,
+	            allFormalOuterwears, allSemiFormalOuterwears, matchedStyles, formalityType, sm, user.getEmail());
+	    } else if ("T03".equals(formalityTypeId)) {
+	        matchCasualStyles(selectedSemiFormalTops, selectedCasualTops, selectedSemiFormalBottoms, selectedCasualBottoms,
+	            selectedSemiFormalDresses, selectedCasualDresses, allSemiFormalTops, allCasualTops, allSemiFormalBottoms,
+	            allCasualBottoms, allSemiFormalOuterwears, allCasualOuterwears, matchedStyles, formalityType, sm, user.getEmail());
 	    }
 	    
-	    // --- โค้ดส่วนท้ายของเมธอด (การเรียงลำดับและส่งข้อมูล) ยังคงเหมือนเดิม ---
+	    // --- Part 4: Sorting & Final View Setup ---
+	    sortClothingItemsInStyles(matchedStyles);
+	    sortMatchedStyles(matchedStyles);
+	    sortSelectedClothes(selectedClothes);
+	    
 	    mav.addObject("selectedClothes", selectedClothes);
-	    
 	    if (matchedStyles.isEmpty()) {
 	        mav.addObject("err_msg", "ไม่พบการจับคู่ที่เหมาะสม");
 	    } else {
 	        mav.addObject("styles", matchedStyles);
 	        mav.addObject("totalStyles", matchedStyles.size());
 	    }
+
+	    session.setAttribute("matchedStyles", matchedStyles);
+	    session.setAttribute("selectedCloth", selectedClothes);
+	    session.removeAttribute("selectedClothes");
+	    session.removeAttribute("selectedClothesMap");
+
+	    return mav;
+	}
+
+	/**
+	 * Clears old session attributes to prepare for a new matching run.
+	 */
+	private void clearSessionAttributes(HttpSession session) {
+	    session.removeAttribute("matchedStyles");
+	    session.removeAttribute("selectedCloth");
+	}
+
+	/**
+	 * Retrieves or creates the map of selected clothes from the session.
+	 */
+	private Map<String, List<String>> getOrCreateSelectedClothesMap(HttpSession session) {
+	    Map<String, List<String>> selectedClothesMap = (Map<String, List<String>>) session.getAttribute("selectedClothesMap");
+	    if (selectedClothesMap == null) {
+	        selectedClothesMap = new HashMap<>();
+	    }
 	    
+	    List<String> currentSelection = (List<String>) session.getAttribute("selectedClothes");
+	    String currentCategory = (String) session.getAttribute("selectedCates");
+	    if (currentCategory == null) {
+	        currentCategory = "CG001";
+	    }
+	    selectedClothesMap.put(currentCategory, currentSelection);
+	    session.setAttribute("selectedClothesMap", selectedClothesMap);
+
+	    return selectedClothesMap;
+	}
+
+	/**
+	 * Categorizes a list of ClothingItem objects into a map based on their formality type and category.
+	 */
+	private Map<String, List<ClothingItem>> categorizeClothes(List<ClothingItem> clothes) {
+	    Map<String, List<ClothingItem>> categorizedMap = new HashMap<>();
+	    for (ClothingItem item : clothes) {
+	        try {
+	            String categoryId = item.getSubCategory().getCategory().getCategoryId();
+	            String formalityId = item.getFormalityType().getTypeId();
+	            String key = formalityId + "_" + categoryId;
+	            categorizedMap.computeIfAbsent(key, k -> new ArrayList<>()).add(item);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    return categorizedMap;
+	}
+
+	/**
+	 * Creates formal styles (T01).
+	 */
+	private void matchFormalStyles(List<ClothingItem> selectedFormalTops, List<ClothingItem> selectedFormalBottoms,
+	                               List<ClothingItem> selectedFormalDresses, List<ClothingItem> allFormalTops,
+	                               List<ClothingItem> allFormalBottoms, List<ClothingItem> allFormalOuterwears,
+	                               List<MatchStyle> matchedStyles, FormalityType formalityType, StyleManager sm, String userEmail) {
+	    // 1. Top(Formal) + Bottom(Formal)
+	    addCombinations(selectedFormalTops, allFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allFormalTops, selectedFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+
+	    // 2. Top(Formal) + Bottom(Formal) + Outerwear(Formal)
+	    addThreePieceCombinations(selectedFormalTops, allFormalBottoms, allFormalOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allFormalTops, selectedFormalBottoms, allFormalOuterwears, matchedStyles, formalityType, sm, userEmail);
+
+	    // 3. Dress(Formal) + Outerwear(Formal)
+	    addCombinations(selectedFormalDresses, allFormalOuterwears, matchedStyles, formalityType, sm, userEmail);
+	}
+
+	/**
+	 * Creates semi-formal styles (T02).
+	 */
+	private void matchSemiFormalStyles(List<ClothingItem> selectedFormalTops, List<ClothingItem> selectedSemiFormalTops,
+	                                   List<ClothingItem> selectedFormalBottoms, List<ClothingItem> selectedSemiFormalBottoms,
+	                                   List<ClothingItem> selectedSemiFormalDresses, List<ClothingItem> allFormalTops,
+	                                   List<ClothingItem> allSemiFormalTops, List<ClothingItem> allFormalBottoms,
+	                                   List<ClothingItem> allSemiFormalBottoms, List<ClothingItem> allFormalOuterwears,
+	                                   List<ClothingItem> allSemiFormalOuterwears, List<MatchStyle> matchedStyles,
+	                                   FormalityType formalityType, StyleManager sm, String userEmail) {
+	    List<ClothingItem> validOuterwears = new ArrayList<>();
+	    validOuterwears.addAll(allFormalOuterwears);
+	    validOuterwears.addAll(allSemiFormalOuterwears);
+
+	    // 1. Top(F) + Bottom(S)
+	    addCombinations(selectedFormalTops, allSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allFormalTops, selectedSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+
+	    // 2. Top(S) + Bottom(F)
+	    addCombinations(selectedSemiFormalTops, allFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allSemiFormalTops, selectedFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+
+	    // 3. Top(S) + Bottom(S)
+	    addCombinations(selectedSemiFormalTops, allSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allSemiFormalTops, selectedSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 4. Top(F) + Bottom(S) + Outerwear(F/S)
+	    addThreePieceCombinations(selectedFormalTops, allSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allFormalTops, selectedSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 5. Top(S) + Bottom(F) + Outerwear(F/S)
+	    addThreePieceCombinations(selectedSemiFormalTops, allFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allSemiFormalTops, selectedFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+
+	    // 6. Top(S) + Bottom(S) + Outerwear(F/S)
+	    addThreePieceCombinations(selectedSemiFormalTops, allSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allSemiFormalTops, selectedSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+
+	    // 7. Dress(S) + Outerwear(F/S)
+	    addCombinations(selectedSemiFormalDresses, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	}
+
+	/**
+	 * Creates casual styles (T03).
+	 */
+	private void matchCasualStyles(List<ClothingItem> selectedSemiFormalTops, List<ClothingItem> selectedCasualTops,
+	                               List<ClothingItem> selectedSemiFormalBottoms, List<ClothingItem> selectedCasualBottoms,
+	                               List<ClothingItem> selectedSemiFormalDresses, List<ClothingItem> selectedCasualDresses,
+	                               List<ClothingItem> allSemiFormalTops, List<ClothingItem> allCasualTops,
+	                               List<ClothingItem> allSemiFormalBottoms, List<ClothingItem> allCasualBottoms,
+	                               List<ClothingItem> allSemiFormalOuterwears, List<ClothingItem> allCasualOuterwears,
+	                               List<MatchStyle> matchedStyles, FormalityType formalityType, StyleManager sm, String userEmail) {
+	    List<ClothingItem> validOuterwears = new ArrayList<>();
+	    validOuterwears.addAll(allSemiFormalOuterwears);
+	    validOuterwears.addAll(allCasualOuterwears);
+
+	    // 1. Top(S) + Bottom(C)
+	    addCombinations(selectedSemiFormalTops, allCasualBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allSemiFormalTops, selectedCasualBottoms, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 2. Top(C) + Bottom(S)
+	    addCombinations(selectedCasualTops, allSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allCasualTops, selectedSemiFormalBottoms, matchedStyles, formalityType, sm, userEmail);
+
+	    // 3. Top(C) + Bottom(C)
+	    addCombinations(selectedCasualTops, allCasualBottoms, matchedStyles, formalityType, sm, userEmail);
+	    addCombinations(allCasualTops, selectedCasualBottoms, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 4. Top(S) + Bottom(C) + Outerwear(S/C)
+	    addThreePieceCombinations(selectedSemiFormalTops, allCasualBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allSemiFormalTops, selectedCasualBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 5. Top(C) + Bottom(S) + Outerwear(S/C)
+	    addThreePieceCombinations(selectedCasualTops, allSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allCasualTops, selectedSemiFormalBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 6. Top(C) + Bottom(C) + Outerwear(S/C)
+	    addThreePieceCombinations(selectedCasualTops, allCasualBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    addThreePieceCombinations(allCasualTops, selectedCasualBottoms, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 7. Dress(S) + Outerwear(S/C)
+	    addCombinations(selectedSemiFormalDresses, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	    
+	    // 8. Dress(C) + Outerwear(S/C)
+	    addCombinations(selectedCasualDresses, validOuterwears, matchedStyles, formalityType, sm, userEmail);
+	}
+
+	/**
+	 * A generic helper method to add two-item combinations to the matched styles list.
+	 */
+	private void addCombinations(List<ClothingItem> list1, List<ClothingItem> list2, List<MatchStyle> matchedStyles,
+	                             FormalityType formalityType, StyleManager sm, String userEmail) {
+	    for (ClothingItem item1 : list1) {
+	        for (ClothingItem item2 : list2) {
+	            if (item1.getClothid().equals(item2.getClothid())) continue;
+	            
+	            MatchStyle potentialStyle = new MatchStyle();
+	            potentialStyle.setFormalityType(formalityType);
+	            potentialStyle.getClothingItems().add(item1);
+	            potentialStyle.getClothingItems().add(item2);
+	            
+	            if (!sm.isStyleAlreadyFavorited(potentialStyle, userEmail) && !isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
+	                matchedStyles.add(potentialStyle);
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * A generic helper method to add three-item combinations to the matched styles list.
+	 */
+	private void addThreePieceCombinations(List<ClothingItem> list1, List<ClothingItem> list2, List<ClothingItem> list3,
+	                                       List<MatchStyle> matchedStyles, FormalityType formalityType, StyleManager sm, String userEmail) {
+	    for (ClothingItem item1 : list1) {
+	        for (ClothingItem item2 : list2) {
+	            if (item1.getClothid().equals(item2.getClothid())) continue;
+	            for (ClothingItem item3 : list3) {
+	                if (item1.getClothid().equals(item3.getClothid()) || item2.getClothid().equals(item3.getClothid())) continue;
+	                
+	                MatchStyle potentialStyle = new MatchStyle();
+	                potentialStyle.setFormalityType(formalityType);
+	                potentialStyle.getClothingItems().add(item1);
+	                potentialStyle.getClothingItems().add(item2);
+	                potentialStyle.getClothingItems().add(item3);
+	                
+	                if (!sm.isStyleAlreadyFavorited(potentialStyle, userEmail) && !isStyleAlreadyAdded(matchedStyles, potentialStyle)) {
+	                    matchedStyles.add(potentialStyle);
+	                }
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Sorts the clothing items within each matched style based on a predefined category order.
+	 */
+	private void sortClothingItemsInStyles(List<MatchStyle> matchedStyles) {
 	    for (MatchStyle style : matchedStyles) {
 	        Collections.sort(style.getClothingItems(), new Comparator<ClothingItem>() {
 	            @Override
@@ -1037,16 +560,21 @@ public class StyleController {
 	            }
 	            private int getCategoryOrder(String categoryId) {
 	                switch (categoryId) {
-	                    case "CG004": return 1;
-	                    case "CG001": return 2;
-	                    case "CG002": return 3;
-	                    case "CG003": return 4;
+	                    case "CG004": return 1; // Outerwear
+	                    case "CG001": return 2; // Top
+	                    case "CG002": return 3; // Bottom
+	                    case "CG003": return 4; // Dress
 	                    default: return 5;
 	                }
 	            }
 	        });
 	    }
+	}
 
+	/**
+	 * Sorts the list of matched styles based on a custom priority (dress/non-dress and item count).
+	 */
+	private void sortMatchedStyles(List<MatchStyle> matchedStyles) {
 	    Collections.sort(matchedStyles, new Comparator<MatchStyle>() {
 	        @Override
 	        public int compare(MatchStyle style1, MatchStyle style2) {
@@ -1080,7 +608,12 @@ public class StyleController {
 	            return 5;
 	        }
 	    });
-	    
+	}
+
+	/**
+	 * Sorts the selected clothing items by sub-category ID.
+	 */
+	private void sortSelectedClothes(List<ClothingItem> selectedClothes) {
 	    Collections.sort(selectedClothes, new Comparator<ClothingItem>() {
 	        @Override
 	        public int compare(ClothingItem item1, ClothingItem item2) {
@@ -1088,14 +621,7 @@ public class StyleController {
 	            String subcateId2 = item2.getSubCategory().getSubCategoryId();
 	            return subcateId1.compareTo(subcateId2);
 	        }
-		});
-
-	    session.setAttribute("matchedStyles", matchedStyles);
-	    session.setAttribute("selectedCloth", selectedClothes);
-	    session.removeAttribute("selectedClothes");
-	    session.removeAttribute("selectedClothesMap");
-	    
-	    return mav;
+	    });
 	}
 
 	/**
