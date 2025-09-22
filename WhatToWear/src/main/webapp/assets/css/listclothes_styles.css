@@ -1,0 +1,359 @@
+@charset "UTF-8";
+
+/* Base Styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Noto Sans Thai', sans-serif;
+}
+
+body {
+	background-color: #f5f5f5;
+}
+
+/* Container Styles */
+.clothes-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+	min-height: calc(100vh - 160px); /* ▼▼▼ EDIT THIS LINE / แก้ไขบรรทัดนี้ ▼▼▼ */
+	display: flex;
+	flex-direction: column;
+}
+
+/* Header Styles */
+.page-title {
+	font-size: 24px;
+	font-weight: 600;
+	margin-bottom: 20px;
+	color: #111827;
+}
+
+/* Filter Styles - Enhanced */
+.filter-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.filter-section {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+}
+
+.filter-dropdown {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.filter-dropdown label {
+	font-size: 12px;
+	color: #6b7280;
+	font-weight: 500;
+	text-align: center;
+}
+
+.select-wrapper {
+	position: relative;
+}
+
+.select-wrapper:after {
+	content: "";
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid #333;
+	pointer-events: none;
+}
+
+select {
+	padding: 8px 35px 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	background-color: #fff;
+	font-size: 14px;
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	cursor: pointer;
+	transition: border-color 0.2s ease;
+	min-width: 150px;
+}
+
+select:focus {
+	outline: none;
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+select:hover {
+	border-color: #9ca3af;
+}
+
+/* Button Styles */
+.delete-btn {
+	display: flex;
+	align-items: center;
+	background-color: #f0f0f0;
+	border: none;
+	border-radius: 8px;
+	padding: 8px 15px;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	text-decoration: none;
+	color: inherit;
+}
+
+.delete-btn:hover {
+	background-color: #e0e0e0;
+}
+
+.delete-btn i {
+	position: relative;
+	top: 2px;
+	margin-right: 8px;
+}
+
+/* Selection buttons styles */
+.selection-buttons {
+	display: flex;
+	gap: 10px;
+}
+
+.cancel-btn {
+	background-color: #f0f0f0;
+	border: none;
+	border-radius: 8px;
+	padding: 8px 15px;
+	font-size: 14px;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	text-decoration: none;
+	color: inherit;
+}
+
+.cancel-btn:hover {
+	background-color: #e0e0e0;
+}
+
+.confirm-delete-btn {
+	display: flex;
+	align-items: center;
+	background-color: #ff3b30;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	padding: 8px 15px;
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.confirm-delete-btn:hover {
+	background-color: #e5352c;
+	transform: translateY(-2px);
+}
+
+.confirm-delete-btn i {
+	position: relative;
+	top: 2px;
+	margin-right: 8px;
+}
+
+/* Clothes Grid Styles */
+.clothes-grid {
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 15px;
+}
+
+.clothes-item {
+	width: 100%; /* Changed to 100% for better grid fitting */
+	height: 200px;
+	background-color: white;
+	border-radius: 5px;
+	overflow: hidden;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	transition: transform 0.2s;
+	position: relative;
+	border: 3px solid transparent;
+}
+
+.clothes-item:hover {
+	transform: translateY(-3px);
+}
+
+.clothes-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Empty State Styles */
+.empty-state {
+	flex-grow: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 40px 20px;
+	text-align: center;
+}
+
+.empty-state-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 20px; /* ระยะห่างระหว่างข้อความกับปุ่ม */
+}
+
+.empty-state p {
+	font-size: 16px;
+	color: #6b7280;
+	max-width: 400px;
+	line-height: 1.6;
+	margin: 0; /* ลบ margin เดิมของ p */
+}
+
+/* New Button Style */
+.add-cloth-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #3b82f6; /* สีน้ำเงิน */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.add-cloth-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.add-cloth-btn i {
+    position: relative;
+    top: 2px;
+}
+
+/* Checkbox and selection mode styles */
+.item-checkbox {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.clothes-checkbox {
+	display: none;
+}
+
+.clothes-item.selectable {
+	cursor: pointer;
+}
+
+.clothes-item.selected {
+	border-color: #ff3b30;
+	box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
+}
+
+.clothes-item.selected::after {
+	content: '\f00c';
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	color: white;
+	background-color: #ff3b30;
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	font-size: 12px;
+}
+
+
+/* ▼▼▼ SECTION EDITED / ส่วนที่แก้ไข ▼▼▼ */
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+	.clothes-grid {
+		grid-template-columns: repeat(5, 1fr); /* จาก 6 เหลือ 5 */
+	}
+}
+
+@media (max-width: 992px) {
+	.clothes-grid {
+		grid-template-columns: repeat(4, 1fr); /* จาก 5 เหลือ 4 */
+	}
+}
+
+@media (max-width: 768px) {
+	.clothes-grid {
+		grid-template-columns: repeat(3, 1fr); /* จาก 4 เหลือ 3 */
+	}
+	
+	.filter-section {
+		flex-direction: column;
+		gap: 15px;
+		align-items: flex-start;
+	}
+}
+
+@media (max-width: 576px) {
+	.clothes-grid {
+		grid-template-columns: repeat(2, 1fr); /* จาก 3 เหลือ 2 */
+	}
+	
+	.filter-container {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+	}
+	
+	.filter-section {
+		width: 100%;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	
+	.selection-buttons {
+		flex-direction: column;
+		width: 100%;
+	}
+	
+	.cancel-btn, .confirm-delete-btn {
+		width: 100%;
+		text-align: center;
+		justify-content: center;
+	}
+}
+
+@media (max-width: 480px) {
+	.clothes-grid {
+		grid-template-columns: 1fr; /* แสดงผล 1 คอลัมน์บนจอมือถือเล็กสุด */
+	}
+}
+
+/* ▲▲▲ END OF EDITED SECTION / สิ้นสุดส่วนที่แก้ไข ▲▲▲ */

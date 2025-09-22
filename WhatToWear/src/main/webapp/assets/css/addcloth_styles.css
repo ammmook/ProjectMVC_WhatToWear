@@ -1,0 +1,418 @@
+/* Base Styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Noto Sans Thai', sans-serif;
+}
+
+body {
+	background-color: #f8f9fa;
+	color: #333;
+	line-height: 1.6;
+}
+
+.main-content {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+/* Header Styles */
+.page-title {
+	text-align: center;
+	font-size: 28px;
+	font-weight: 600;
+	margin-bottom: 1rem; /* ปรับระยะห่าง */
+	color: #333;
+	padding-top: 20px;
+}
+
+/* Form Container */
+.add-clothing-form {
+	background-color: white;
+	border-radius: 12px; /* เพิ่มความโค้งมน */
+	padding: 2.5rem; /* เพิ่ม padding ให้นุ่มนวลขึ้น */
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ปรับเงาให้นุ่มขึ้น */
+}
+
+/* Two Column Layout */
+.form-layout {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 3rem; /* เพิ่มระยะห่างระหว่างคอลัมน์ */
+	margin-bottom: 2rem;
+}
+
+.image-section {
+	display: flex;
+	flex-direction: column;
+}
+
+.form-section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.form-group {
+	margin-bottom: 1.75rem; /* เพิ่มระยะห่างระหว่างฟิลด์ */
+}
+
+.form-label {
+	display: block;
+	margin-bottom: 0.75rem; /* ปรับระยะห่าง */
+	font-weight: 500;
+	color: #333;
+	font-size: 16px;
+}
+
+/* Field Hint */
+.form-hint {
+	font-size: 14px;
+	color: #6c757d;
+	margin-top: -0.5rem;
+	margin-bottom: 0.75rem;
+}
+
+/* Image Upload Area */
+.image-upload-area {
+	border: 2px dashed #e0e0e0;
+	border-radius: 12px;
+	width: 350px;
+	height: 350px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	color: #6c757d;
+	transition: all 0.3s ease;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	margin: 0 auto;
+}
+
+.image-upload-area:hover {
+	border-color: #111827;
+	background-color: #f8f9fa;
+}
+
+.image-upload-area.has-image {
+	border-style: solid;
+	border-color: #111827;
+}
+
+.image-upload-area.error {
+	border-color: #dc3545;
+	background-color: #fff5f5;
+}
+
+.upload-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	height: 100%;
+	transition: opacity 0.3s ease;
+}
+
+/* Upload Icon */
+.upload-placeholder i {
+	font-size: 48px;
+	margin-bottom: 1rem;
+	color: #adb5bd;
+}
+
+.upload-placeholder.hidden {
+	opacity: 0;
+	pointer-events: none;
+	position: absolute;
+}
+
+.upload-info {
+	font-size: 0.9rem;
+	color: #6c757d;
+	margin-top: 0.5rem;
+}
+
+/* Uploaded Image Display */
+.uploaded-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	border-radius: 10px;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.uploaded-image.visible {
+	opacity: 1;
+}
+
+#clothing-image {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+}
+
+/* Form Elements */
+.form-select {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	background-color: white;
+	font-size: 16px;
+	color: #333;
+	transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+	outline: none;
+	border-color: #111827;
+}
+
+.form-select.error {
+	border-color: #dc3545;
+	background-color: #fff5f5;
+}
+
+.radio-group {
+	display: flex;
+	gap: 2rem;
+}
+
+.radio-group.error {
+	background-color: #fff5f5;
+	padding: 8px;
+	border-radius: 4px;
+	border: 1px solid #dc3545;
+}
+
+.radio-option {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+}
+
+.radio-option input[type="radio"] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 18px;
+	height: 18px;
+	border: 2px solid #e0e0e0;
+	border-radius: 50%;
+	margin-right: 8px;
+	position: relative;
+	cursor: pointer;
+}
+
+.radio-option input[type="radio"]:checked {
+	border-color: #111827;
+}
+
+.radio-option input[type="radio"]:checked::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 10px;
+	height: 10px;
+	background-color: #111827;
+	border-radius: 50%;
+}
+
+/* Form Actions */
+.form-button-group {
+	display: flex;
+	justify-content: center;
+	gap: 15px;
+	margin-top: 30px;
+	grid-column: 1/-1;
+}
+
+.submit-button {
+	padding: 12px 24px;
+	background-color: #111827;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+	background-color: #0f172a;
+}
+
+.submit-button:disabled {
+	background-color: #6c757d;
+	cursor: not-allowed;
+}
+
+.cancel-button {
+	padding: 12px 24px;
+	background-color: transparent;
+	border: 1px solid #111827;
+	color: #111827;
+	border-radius: 6px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.cancel-button:hover {
+	background-color: #f1f1f1;
+}
+
+/* Error Messages */
+.error-message {
+	color: #dc3545;
+	font-size: 14px;
+	margin-top: 5px;
+	display: none;
+}
+
+.error-message.show {
+	display: block;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+	.main-content {
+		padding: 15px;
+	}
+
+	.add-clothing-form {
+		padding: 1.5rem;
+	}
+
+	.form-layout {
+		grid-template-columns: 1fr;
+		gap: 2rem;
+	}
+
+	.image-upload-area {
+		width: 100%;
+		height: 300px;
+	}
+
+	.radio-group {
+		gap: 1rem;
+	}
+
+	.form-button-group {
+		flex-direction: column;
+	}
+
+	.submit-button,
+	.cancel-button {
+		width: 100%;
+	}
+}
+
+/* AI Loading Styles */
+.ai-loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.95);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	border-radius: 12px;
+}
+
+.loading-content {
+	text-align: center;
+	color: #667eea;
+}
+
+.loading-content .spinner {
+	width: 40px;
+	height: 40px;
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid #667eea;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 15px;
+}
+
+.loading-content p {
+	margin: 0;
+	font-weight: 500;
+	font-size: 14px;
+}
+
+.ai-updated {
+	animation: aiPulse 2s ease;
+	border-color: #667eea !important;
+}
+
+@keyframes aiPulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+		background-color: rgba(102, 126, 234, 0.1);
+	}
+	50% {
+		box-shadow: 0 0 0 8px rgba(102, 126, 234, 0);
+		background-color: rgba(102, 126, 234, 0.05);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+		background-color: transparent;
+	}
+}
+
+.radio-group.ai-updated {
+	animation: radioGroupPulse 2s ease;
+}
+
+@keyframes radioGroupPulse {
+	0% {
+		background-color: rgba(102, 126, 234, 0.1);
+		border-radius: 8px;
+	}
+	50% {
+		background-color: rgba(102, 126, 234, 0.05);
+	}
+	100% {
+		background-color: transparent;
+	}
+}
+
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.form-select:disabled,
+input[type="radio"]:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.radio-option:has(input:disabled) {
+	opacity: 0.6;
+	cursor: not-allowed;
+}

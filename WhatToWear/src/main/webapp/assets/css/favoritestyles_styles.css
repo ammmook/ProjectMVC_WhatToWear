@@ -1,0 +1,285 @@
+@charset "UTF-8";
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Noto Sans Thai', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+}
+
+.favorite-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: calc(100vh - 160px); /* Adjust based on header/footer height */
+    display: flex;
+    flex-direction: column;
+}
+
+.favorite-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #111827;
+}
+
+/* Filter section styles */
+.filter-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+}
+
+.filter-label {
+    font-size: 14px;
+    color: #666;
+    margin-right: 10px;
+}
+
+.filter-dropdown {
+    position: relative;
+}
+
+.sort-select {
+    padding: 5px 55px 5px 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.dropdown-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #666;
+}
+
+/* Checkbox styles */
+.filter-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-checkbox-group input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.filter-checkbox-group label {
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+}
+
+/* Grid layout for favorite cards */
+.favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+/* Style card */
+.style-card {
+    background-color: white;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    width: 100%;
+    margin: 0;
+}
+
+.style-card:hover {
+    transform: translateY(-3px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.style-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+.style-tag {
+    background-color: #f0f0f0;
+    padding: 3px 8px;
+    border-radius: 16px;
+    font-size: 11px;
+    color: #777;
+}
+
+.style-items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+}
+
+.item-container {
+    position: relative;
+    width: 180px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+/* ▼▼▼ SECTION EDITED / ส่วนที่แก้ไข ▼▼▼ */
+/* Empty State Styles */
+.empty-state {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px; /* Space between message and button */
+}
+
+.empty-state p {
+    font-size: 16px;
+    color: #6b7280;
+    max-width: 400px;
+    line-height: 1.6;
+}
+
+/* New Button Style */
+.search-style-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #3b82f6; /* Blue color */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.search-style-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.search-style-btn i {
+    position: relative;
+    top: 2px;
+}
+/* ▲▲▲ END SECTION EDITED / สิ้นสุดส่วนที่แก้ไข ▲▲▲ */
+
+
+/* Favorite button */
+.favorite-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(100% - 30px);
+    margin: 0 15px 15px;
+    padding: 8px;
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+}
+
+.favorite-button i {
+    position: relative;
+    top: 3px;
+    margin-right: 6px;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+    .favorites-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .style-card {
+        max-width: 100%;
+    }
+    .filter-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .filter-group {
+        width: 100%;
+    }
+    .filter-dropdown {
+        width: 100%;
+    }
+    .sort-select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .favorites-grid {
+        grid-template-columns: 1fr;
+    }
+    .style-card {
+        max-width: 240px;
+        margin: 0 auto;
+    }
+}

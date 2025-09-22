@@ -1,0 +1,332 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+	font-family: 'Noto Sans Thai', sans-serif;
+}
+
+body {
+    font-family: 'Noto Sans Thai', sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 2-Column Layout */
+.layout-container {
+    display: grid;
+    grid-template-columns: 320px 1fr; /* คอลัมน์ซ้ายกว้าง 320px ที่เหลือเป็นของขวา */
+    gap: 30px;
+    align-items: start;
+}
+
+.left-column {
+    position: sticky; /* ทำให้คอลัมน์ซ้ายค้างเมื่อ scroll */
+    top: 20px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 40px); /* ความสูงเกือบเต็มจอ */
+}
+
+.style-selection {
+    flex-grow: 1; /* ดันให้ปุ่มอยู่ด้านล่างสุด */
+}
+
+/* Header Styles */
+.page-title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: #333;
+    padding-top: 20px;
+}
+
+.selection-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    gap: 10px;
+    width: fit-content;
+}
+
+.tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    background-color: #f1f1f1;
+}
+
+.tab.selected {
+    background-color: #111827;
+    color: white;
+}
+
+.tab-category {
+    text-decoration: none;
+    color: inherit;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-category img {
+   width: 20px;
+   height: 20px;
+}
+
+.tab.selected .tab-category img {
+   filter: brightness(0) invert(1);
+}
+
+.tab.selected .tab-category {
+    color: white;
+}
+
+/* Empty State Styles */
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 220px;
+    width: 100%;
+    text-align: center;
+    color: #666;
+}
+
+.empty-state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.empty-state-content p {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* New Button Style */
+.add-cloth-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.add-cloth-btn:hover {
+    background-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
+}
+
+.add-cloth-btn i {
+    position: relative;
+    top: 2px;
+}
+
+/* Clothing Scroll Container & Grid (Vertical Scroll) */
+.clothing-scroll-container {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;  
+    height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+.clothing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+}
+
+
+.clothing-item {
+    flex: 0 0 auto;
+    width: 100%; /* Full width of grid column */
+    height: 200px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.clothing-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.clothing-scroll-container::-webkit-scrollbar-track {
+    background: #f4f4f4;
+}
+
+.clothing-scroll-container::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 4px;
+}
+
+.clothing-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.clothing-checkbox,
+.clothing-label {
+    display: none;
+}
+
+/* Selection highlight */
+.clothing-item.selected {
+    border-color: #111827;
+    box-shadow: 0 4px 12px rgba(17, 24, 39, 0.2);
+}
+
+.clothing-item.selected::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    color: white;
+    background-color: #111827;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 12px;
+}
+
+/* Style Selection (Left Column) */
+.style-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.style-option input[type="radio"] {
+    display: none;
+}
+
+.style-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.style-icon {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.style-option input[type="radio"]:checked + .style-label {
+    border-color: #111827;
+    background-color: #111827;
+    color: white;
+}
+
+.style-option input[type="radio"]:checked + .style-label .style-icon {
+    color: white;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 15px;
+    margin-top: auto; /* Push to the bottom */
+    padding-top: 20px; /* Add some space above */
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%; /* Full width */
+}
+
+.btn-primary {
+    background-color: #111827;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    border: 1px solid #111827;
+    color: #111827;
+}
+
+.btn-primary:hover {
+    background-color: #0f172a;
+}
+
+.btn-secondary:hover {
+    background-color: #f1f1f1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+    .layout-container {
+        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+    
+    .left-column {
+        position: static; /* Remove sticky positioning */
+        height: auto;
+    }
+
+    .clothing-scroll-container {
+        height: 500px; /* Fixed height for scroll area on mobile */
+    }
+}
+
+
+@media (max-width: 768px) {
+    .category-tabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+}

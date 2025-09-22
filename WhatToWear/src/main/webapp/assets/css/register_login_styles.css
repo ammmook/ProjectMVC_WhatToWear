@@ -1,0 +1,220 @@
+/* Base styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Noto Sans Thai', sans-serif;
+	color: #333;
+	background-color: #f9f9f9;
+	line-height: 1.6;
+}
+
+/* Form container */
+.form-container {
+	max-width: 450px;
+	margin: 3rem auto;
+	padding: 2rem;
+	background-color: #fff;
+	border-radius: 16px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+	text-align: center;
+}
+
+.form-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+	color: #111827;
+}
+
+.form-subtitle {
+	color: #4B5563;
+	margin-bottom: 1.5rem;
+	font-size: 0.9rem;
+}
+
+/* Form groups and inputs */
+.form-group {
+	position: relative;
+	margin-bottom: 1rem;
+	text-align: left;
+}
+
+.form-label {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-size: 0.9rem;
+	color: #4B5563;
+}
+
+.form-control {
+	width: 100%;
+	padding: 0.7rem 0.8rem 0.7rem 2.5rem;
+	/* เพิ่ม padding ด้านซ้ายเล็กน้อยเพื่อรองรับ Flaticon Uicons */
+	border: 2px solid #e0e0e0;
+	border-radius: 8px;
+	font-size: 0.9rem;
+	font-family: 'Noto Sans Thai', sans-serif;
+	color: #333; /* เปลี่ยนสีให้เข้มขึ้นจาก #D1D5DB เพื่อให้อ่านง่ายขึ้น */
+	background-color: #fff;
+	transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+	color: #9CA3AF; /* เพิ่มสี placeholder ให้อ่อนลง */
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: #111827;
+	box-shadow: 0 0 0 2px rgba(21, 25, 34, 0.1);
+}
+
+.input-with-icon {
+	position: relative;
+}
+
+.input-icon {
+	position: absolute;
+	left: 0.9rem; /* ปรับตำแหน่งให้เหมาะสมกับ Flaticon Uicons */
+	top: 55%;
+	transform: translateY(-50%);
+	color: #6B7280; /* ปรับสีให้เข้ากับ Flaticon Uicons */
+	z-index: 1;
+	font-size: 16px; /* ปรับขนาดให้เหมาะสมกับ Flaticon Uicons */
+}
+
+/* Gender selection */
+.gender-group {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.gender-option {
+	flex: 1;
+}
+
+.gender-option input[type="radio"] {
+	display: none;
+}
+
+.gender-option label {
+	display: block;
+	padding: 0.6rem;
+	background-color: #fff;
+	border: 2px solid #e0e0e0;
+	border-radius: 8px;
+	text-align: center;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.gender-option input[type="radio"]:checked+label {
+	background-color: #111827;
+	border-color: #111827;
+	color: white;
+}
+
+/* Password field */
+.password-field {
+	position: relative;
+}
+
+/* ช่องรหัสผ่านต้องมี padding ทั้งซ้ายและขวาเพื่อรองรับไอคอน */
+.password-field .form-control {
+	padding-right: 2.5rem; /* เพิ่ม padding ด้านขวาเพื่อรองรับไอคอนตา */
+}
+
+.password-toggle {
+	position: absolute;
+	right: 0.9rem; /* ปรับตำแหน่งให้เหมาะสม */
+	top: 55%;
+	transform: translateY(-50%);
+	color: #6B7280; /* ปรับสีให้เข้ากับธีม */
+	cursor: pointer;
+	transition: color 0.3s ease;
+	font-size: 16px; /* ปรับขนาดให้เหมาะสมกับ Flaticon Uicons */
+}
+
+.password-toggle:hover {
+	color: #111827; /* เปลี่ยนเป็นสีหลักเมื่อ hover */
+}
+
+/* Submit button */
+.submit-btn {
+	width: 100%;
+	padding: 0.8rem;
+	background-color: #111827;
+	color: #fff;
+	border: none;
+	border-radius: 8px;
+	font-size: 1rem;
+	font-weight: 500;
+	font-family: 'Noto Sans Thai', sans-serif;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	margin-top: 1rem;
+}
+
+.submit-btn:hover {
+	background-color: rgb(36, 44, 60);
+}
+
+/* Link to login/register */
+.go-link {
+	display: block;
+	margin-top: 1.5rem;
+	color: #555;
+	text-decoration: none;
+	font-size: 0.85rem;
+	transition: color 0.3s ease;
+}
+
+.go-link:hover {
+	color: #111827;
+	text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media ( max-width : 768px) {
+	.form-container {
+		margin: 2rem 1rem;
+		padding: 1.5rem;
+	}
+}
+
+/* สไตล์สำหรับช่องกรอกข้อมูลที่ไม่ถูกต้อง */
+.form-control.invalid {
+	border: 2px solid #e74c3c !important;
+	background-color: rgba(231, 76, 60, 0.05);
+}
+
+.password-field .invalid, .input-with-icon .invalid {
+	border: 2px solid #e74c3c !important;
+	background-color: rgba(231, 76, 60, 0.05);
+}
+
+/* เพิ่มไอคอนแสดงข้อผิดพลาด */
+.error-icon {
+	position: relative;
+  	top: 3px;
+  	left: 0.35rem;
+	color: #e74c3c;
+	margin-right: 5px;
+	font-size: 1rem;
+}
+
+/* สไตล์สำหรับการเลือกเพศที่ไม่ถูกต้อง */
+.gender-option.invalid {
+	border: 2px solid #e74c3c;
+	border-radius: 8px;
+	background-color: rgba(231, 76, 60, 0.05);
+}
+
+.error-message {
+	color: #e74c3c;
+}

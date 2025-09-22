@@ -1,0 +1,29 @@
+@charset "UTF-8";
+
+/* Footer styles */
+.footer {
+	background-color: #111827;
+	color: #fff;
+	padding: 2rem 0;
+	text-align: center;
+}
+
+.footer-logo {
+	font-size: 1.5rem;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+}
+
+.footer-tagline {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.9rem;
+	margin-bottom: 1.5rem;
+}
+
+.footer-copyright {
+	font-size: 0.8rem;
+	color: rgba(255, 255, 255, 0.5);
+	padding-top: 1.5rem;
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+	margin-top: 1rem;
+}
