@@ -37,21 +37,22 @@ public class StyleController {
 	        }
 
 	        int styleIndex = Integer.parseInt(indexStr);
-	        List<MatchStyle> allMatchedStyles = (List<MatchStyle>) session.getAttribute("matchedStyles");
+	        List<MatchStyle> stylesShownToUser = (List<MatchStyle>) session.getAttribute("stylesForShow");
 	        
-	        if (allMatchedStyles == null || styleIndex >= allMatchedStyles.size()) {
+	        if (stylesShownToUser == null || styleIndex >= stylesShownToUser.size()) {
 	            System.out.println("ไม่พบข้อมูลชุดที่เลือก");
 	            mav.addObject("err_msg", "ไม่พบข้อมูลชุดที่เลือก");
 	            return mav;
 	        }
 
-	        MatchStyle selectedStyle = allMatchedStyles.get(styleIndex);
+	        MatchStyle selectedStyle = stylesShownToUser.get(styleIndex);
 
 	        StyleManager sm = new StyleManager();
 	        boolean result = sm.saveFavoriteStyle(selectedStyle, user.getEmail());
 
 	        if (result) {
 	            mav = new ModelAndView("redirect:/showstyles");
+	            System.out.println("index : " + indexStr);
 	            System.out.println("✅ saved favorite");
 	        } else {
 	            System.out.println("❌ cant save favorite");
@@ -649,17 +650,15 @@ public class StyleController {
 	    mav.addObject("totalStyles", finalStylesToShow.size());
 	    mav.addObject("filterClothingId", filterClothingId);
 	    
+	    session.setAttribute("stylesForShow", finalStylesToShow);
+	    
 	    if (finalStylesToShow.isEmpty()) {
 	        mav.addObject("err_msg", "ไม่พบสไตล์ที่แนะนำ หรือคุณอาจบันทึกทั้งหมดเป็นรายการโปรดแล้ว");
 	    }
 
 	    return mav;
 	}
-	
-	/**
-	 * Helper Method: ตรวจสอบว่า style ที่กำหนด มีอยู่ในรายการ favoriteStyles หรือไม่
-	 * โดยเปรียบเทียบจากชุด ID ของเสื้อผ้าข้างใน
-	 */
+
 	private boolean isStyleInFavoritesList(MatchStyle style, List<MatchStyle> favoriteStyles) {
 	    if (favoriteStyles == null || favoriteStyles.isEmpty()) {
 	        return false;
