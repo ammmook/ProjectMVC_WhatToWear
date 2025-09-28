@@ -62,8 +62,10 @@ public class ClothingController {
 
 		return mav;
 	}
+	
+	
 
-	public static final String saveimage = "C:\\Users\\Lenovo\\eclipse-workspace\\WhatToWear\\src\\main\\webapp\\assets\\img\\clothes";
+	public static final String saveimage = "C:\\Users\\Lenovo\\git\\repository\\WhatToWear\\src\\main\\webapp\\assets\\img\\clothes";
 
 	@RequestMapping(value = "addcloth", method = RequestMethod.POST)
 	public ModelAndView addCloth(HttpSession session, HttpServletRequest request,

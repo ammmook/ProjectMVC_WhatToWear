@@ -193,26 +193,38 @@ public class StyleController {
 	        return new ModelAndView("redirect:/logout");
 	    }
 
+	    // --- ส่วนที่ 1: รับค่าจาก Request ---
 	    String categoryId = request.getParameter("id");
+	    String formalityTypeFromRequest = request.getParameter("formality_type"); // รับค่าที่ส่งมาจาก JS
 	    String[] clothesId = request.getParameterValues("clothid");
-	    String clearClothId = request.getParameter("clear");
-	    
-	    if (clearClothId != null) {
+	    String clearParam = request.getParameter("clear");
+
+	    if (clearParam != null) {
 	    	session.removeAttribute("selectedClothes");
+	        session.removeAttribute("selectedFormalityType"); // แก้ชื่อให้สอดคล้องกัน
 	    }
 
+	    // --- ส่วนที่ 2: จัดการค่า Formality Type (สำคัญ) ---
+	    // ถ้ามีค่าใหม่ส่งมาจาก Request ให้ใช้ค่านั้นอัปเดต Session
+	    if (formalityTypeFromRequest != null) {
+	        session.setAttribute("selectedFormalityType", formalityTypeFromRequest);
+	    }
+	    // ดึงค่าล่าสุดจาก Session (ไม่ว่าจะเป็นค่าใหม่หรือค่าเก่า)
+	    String finalFormalityType = (String) session.getAttribute("selectedFormalityType");
+
+
+	    // --- ส่วนที่ 3: จัดการ Category และ Clothes (เหมือนเดิม) ---
 	    if (categoryId == null) {
 	        categoryId = "CG001";
 	    }
 
 	    List<String> selectedClothes = (List<String>) session.getAttribute("selectedClothes");
 	    if (selectedClothes == null) {
-	        selectedClothes = new ArrayList<String>();
+	        selectedClothes = new ArrayList<>();
 	    }
 
 	    if (clothesId != null) {
 	        for (String id : clothesId) {
-	        	System.out.println(id);
 	            if (selectedClothes.contains(id)) {
 	                selectedClothes.remove(id);
 	            } else {
@@ -221,12 +233,17 @@ public class StyleController {
 	        }
 	    }
 
+	    // --- ส่วนที่ 4: ส่งข้อมูลทั้งหมดกลับไปที่หน้า JSP ---
 	    session.setAttribute("selectedClothes", selectedClothes);
 	    mav.addObject("selectedClothes", selectedClothes);
 	    
 	    session.setAttribute("selectedCates", categoryId);
 	    mav.addObject("selectedCates", categoryId);
+	    
+	    // ส่งค่า formality ที่เลือกไว้กลับไปด้วย เพื่อให้ JSP รู้ว่าต้อง check ปุ่มไหน
+	    mav.addObject("selectedFormalityType", finalFormalityType); 
 
+	    // --- ส่วนที่ 5: โหลดข้อมูลเสื้อผ้า (เหมือนเดิม) ---
 	    StyleManager sm = new StyleManager();
 	    List<ClothingItem> clothes = sm.getClothingByCategory(user.getEmail(), categoryId);
 

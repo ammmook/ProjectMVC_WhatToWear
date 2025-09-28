@@ -1,43 +1,64 @@
 document.addEventListener('DOMContentLoaded', function() {
+	
+	function initializeFormalitySelection() {
+	    // 1. ค้นหา radio buttons ทั้งหมดในกลุ่ม 'formality_type'
+	    const formalityRadios = document.querySelectorAll('input[name="formality_type"]');
 
-	// ===== การจัดการการเลือกเสื้อผ้า =====
+	    // 2. เพิ่ม Event Listener ให้กับทุกปุ่ม
+	    formalityRadios.forEach(function(radio) {
+	        // ใช้ 'change' event เพื่อให้ทำงานเมื่อมีการเปลี่ยนแปลงการเลือก
+	        radio.addEventListener('change', function() {
+	            // 3. ดึงค่า value ของปุ่มที่ถูกเลือก (เช่น 'T01', 'T02')
+	            const selectedTypeId = this.value; 
+	            
+	            // 4. ดึงค่า category ที่กำลังเลือกอยู่ (ถ้ามี)
+	            const selectedCategoryId = getSelectedCategory();
+
+	            // 5. เรียกฟังก์ชันเพื่อสร้าง URL และส่งข้อมูล
+	            sendFormalitySelection(selectedTypeId, selectedCategoryId);
+	        });
+	    });
+	}
+
+	/**
+	 * ฟังก์ชันสำหรับสร้าง URL และนำทางไปยัง Controller
+	 */
+	function sendFormalitySelection(typeId, categoryId) {
+	    // ***สำคัญ***: ชื่อพารามิเตอร์ (formality_type) ต้องตรงกับที่ Controller คาดหวัง
+	    window.location.href = `matchstyles?formality_type=${typeId}&id=${categoryId}`;
+	}
+
+	// --- ฟังก์ชันเดิมของคุณ (เพื่อให้โค้ดสมบูรณ์) ---
+
 	function initializeClothingSelection() {
-		const clothingItems = document.querySelectorAll('.clothing-item');
-
-		// เพิ่ม event listener ให้กับแต่ละชิ้นเสื้อผ้า
-		clothingItems.forEach(function(item) {
-			item.addEventListener('click', function() {
-				// หา checkbox ที่อยู่ภายในชิ้นเสื้อผ้านี้
-				const checkbox = this.querySelector('.clothing-checkbox');
-
-				// ดึงข้อมูลที่จำเป็นสำหรับการนำทาง
-				const clothid = checkbox.value;
-				const selectedCates = getSelectedCategory();
-
-				// นำทางไปยัง controller พร้อมส่งข้อมูล
-				selectCloth(clothid, selectedCates);
-			});
-		});
+	    const clothingItems = document.querySelectorAll('.clothing-item');
+	    clothingItems.forEach(function(item) {
+	        item.addEventListener('click', function() {
+	            const checkbox = this.querySelector('.clothing-checkbox');
+	            const clothid = checkbox.value;
+	            const selectedCates = getSelectedCategory();
+	            selectCloth(clothid, selectedCates);
+	        });
+	    });
 	}
 
-	// ฟังก์ชันสำหรับการนำทางไปยัง controller
 	function selectCloth(clothid, cateid) {
-		window.location = "matchstyles?clothid=" + clothid + "&id=" + cateid;
+	    // ส่ง formality_type ที่เลือกไว้ไปด้วย (ถ้ามี) เพื่อไม่ให้ค่าหาย
+	    const selectedRadio = document.querySelector('input[name="formality_type"]:checked');
+	    let url = `matchstyles?clothid=${clothid}&id=${cateid}`;
+	    if (selectedRadio) {
+	        url += `&formality_type=${selectedRadio.value}`;
+	    }
+	    window.location.href = url;
 	}
 
-	// ฟังก์ชันสำหรับดึงหมวดหมู่ที่เลือกในปัจจุบัน
 	function getSelectedCategory() {
-		// หาแท็บที่มีคลาส 'selected'
-		const selectedTab = document.querySelector('.tab.selected .tab-category');
-		if (selectedTab) {
-			// ดึง category id จาก href
-			const href = selectedTab.getAttribute('href');
-			const urlParams = new URLSearchParams(href.split('?')[1]);
-			return urlParams.get('id');
-		}
-
-		// ถ้าไม่เจอให้ใช้ค่าเริ่มต้น
-		return 'CG001';
+	    const selectedTab = document.querySelector('.tab.selected a');
+	    if (selectedTab) {
+	        const urlParams = new URLSearchParams(selectedTab.search);
+	        return urlParams.get('id');
+	    }
+	    return 'CG001'; // Default
 	}
 
 	// ===== การจัดการการเลือกรูปแบบการแต่งกาย =====
@@ -170,6 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 
 	// ===== เรียกใช้ฟังก์ชันทั้งหมดเมื่อเว็บไซต์โหลดเสร็จ =====
+	initializeFormalitySelection();
 	initializeClothingSelection();
 	initializeStyleSelection();
 	initializeFormSubmission();

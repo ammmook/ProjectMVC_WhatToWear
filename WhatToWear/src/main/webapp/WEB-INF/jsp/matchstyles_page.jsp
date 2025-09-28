@@ -28,7 +28,7 @@
 			                <h2 class="selection-title">เลือกรูปแบบการแต่งกาย</h2>
 			                <div class="style-options">
 			                    <div class="style-option">
-			                         <input type="radio" name="formality_type" id="formal" value="T01">
+			                         <input type="radio" name="formality_type" id="formal" value="T01" ${selectedFormalityType == 'T01' ? 'checked' : ''}>
 			                        <label for="formal" class="style-label">
 			                            <div class="style-icon">
 			                                <i class="fi fi-ss-shirt"></i>
@@ -37,7 +37,7 @@
 			                         </label>
 			                    </div>
 			                    <div class="style-option">
-			                        <input type="radio" name="formality_type" id="semiformal" value="T02">
+			                        <input type="radio" name="formality_type" id="semiformal" value="T02" ${selectedFormalityType == 'T02' ? 'checked' : ''}>
 			                         <label for="semiformal" class="style-label">
 			                            <div class="style-icon">
 			                                <i class="fi fi-ss-shirt-long-sleeve"></i>
@@ -46,7 +46,7 @@
 			                        </label>
 			                    </div>
 			                    <div class="style-option selected">
-			                        <input type="radio" name="formality_type" id="casual" value="T03">
+			                        <input type="radio" name="formality_type" id="casual" value="T03" ${selectedFormalityType == 'T03' ? 'checked' : ''}>
 			                        <label for="casual" class="style-label">
 			                            <div class="style-icon">
 			                                <i class="fi fi-ss-tshirt"></i>
