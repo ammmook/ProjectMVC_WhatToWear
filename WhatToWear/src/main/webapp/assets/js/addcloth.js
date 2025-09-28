@@ -36,7 +36,7 @@ function checkGenderAndSelection(event) {
 				reverseButtons: true
 			}).then((result) => {
 				if (!result.isConfirmed) {
-					event.target.value = "";
+					resetForm();
 					console.log('User cancelled the selection.');
 				}
 			});
@@ -282,7 +282,7 @@ function updateFormWithPredictions(predictions) {
 							reverseButtons: true
 						}).then((result) => {
 							if (!result.isConfirmed) {
-								subcategorySelect.selectedIndex = 0; // รีเซ็ตกลับไปที่ "-- เลือกหมวดหมู่ --"
+								resetForm()
 								console.log('User cancelled the AI-selected gender-specific item.');
 								validateSubcategory(); // ตรวจสอบความถูกต้องอีกครั้งหลังรีเซ็ต
 							}

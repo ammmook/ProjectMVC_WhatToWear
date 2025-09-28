@@ -44,8 +44,8 @@
 
 					<div class="form-section">
 						<div class="form-group">
-							<label class="form-label required">หมวดหมู่เสื้อผ้า</label> <select
-								name="subcategory" class="form-select" id="subcategory">
+							<label class="form-label required">หมวดหมู่เสื้อผ้า</label> 
+							<select name="subcategory" class="form-select" id="subcategory">
 								<option value="" selected disabled>-- เลือกหมวดหมู่ --</option>
 								<c:forEach var="item" items="${subcates}">
 									<option value="${item.subCategoryId}">${item.subCategoryName}</option>
@@ -93,7 +93,7 @@
 	<script type="text/javascript">
         const userGender = '${userGender}'; 
     </script>
-	<script type="text/javascript" src="assets/js/addcloth.js"></script>
+	<script type="text/javascript" src="assets/js/addcloth.js?v=1.0"></script>
 
 	<c:if test="${showAlert}">
 		<script>

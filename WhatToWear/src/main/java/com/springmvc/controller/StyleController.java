@@ -51,7 +51,7 @@ public class StyleController {
 	        boolean result = sm.saveFavoriteStyle(selectedStyle, user.getEmail());
 
 	        if (result) {
-	            mav = new ModelAndView("redirect:/favoritestyles");
+	            mav = new ModelAndView("redirect:/showstyles");
 	            System.out.println("✅ saved favorite");
 	        } else {
 	            System.out.println("❌ cant save favorite");
@@ -74,6 +74,7 @@ public class StyleController {
 	        return new ModelAndView("redirect:/logout");
 	    }
 	    
+	    session.removeAttribute("showOuterwear");
 	    session.setAttribute("selectedType", "alltype");
 	    mav.addObject("selectedType", "alltype");
 
@@ -193,7 +194,6 @@ public class StyleController {
 	        return new ModelAndView("redirect:/logout");
 	    }
 
-	    // --- ส่วนที่ 1: รับค่าจาก Request ---
 	    String categoryId = request.getParameter("id");
 	    String formalityTypeFromRequest = request.getParameter("formality_type"); // รับค่าที่ส่งมาจาก JS
 	    String[] clothesId = request.getParameterValues("clothid");
@@ -201,19 +201,15 @@ public class StyleController {
 
 	    if (clearParam != null) {
 	    	session.removeAttribute("selectedClothes");
-	        session.removeAttribute("selectedFormalityType"); // แก้ชื่อให้สอดคล้องกัน
+	        session.removeAttribute("selectedFormalityType");
 	    }
 
-	    // --- ส่วนที่ 2: จัดการค่า Formality Type (สำคัญ) ---
-	    // ถ้ามีค่าใหม่ส่งมาจาก Request ให้ใช้ค่านั้นอัปเดต Session
 	    if (formalityTypeFromRequest != null) {
 	        session.setAttribute("selectedFormalityType", formalityTypeFromRequest);
 	    }
-	    // ดึงค่าล่าสุดจาก Session (ไม่ว่าจะเป็นค่าใหม่หรือค่าเก่า)
+	    
 	    String finalFormalityType = (String) session.getAttribute("selectedFormalityType");
 
-
-	    // --- ส่วนที่ 3: จัดการ Category และ Clothes (เหมือนเดิม) ---
 	    if (categoryId == null) {
 	        categoryId = "CG001";
 	    }
@@ -233,17 +229,14 @@ public class StyleController {
 	        }
 	    }
 
-	    // --- ส่วนที่ 4: ส่งข้อมูลทั้งหมดกลับไปที่หน้า JSP ---
 	    session.setAttribute("selectedClothes", selectedClothes);
 	    mav.addObject("selectedClothes", selectedClothes);
 	    
 	    session.setAttribute("selectedCates", categoryId);
 	    mav.addObject("selectedCates", categoryId);
 	    
-	    // ส่งค่า formality ที่เลือกไว้กลับไปด้วย เพื่อให้ JSP รู้ว่าต้อง check ปุ่มไหน
 	    mav.addObject("selectedFormalityType", finalFormalityType); 
 
-	    // --- ส่วนที่ 5: โหลดข้อมูลเสื้อผ้า (เหมือนเดิม) ---
 	    StyleManager sm = new StyleManager();
 	    List<ClothingItem> clothes = sm.getClothingByCategory(user.getEmail(), categoryId);
 
@@ -390,6 +383,7 @@ public class StyleController {
 	    session.setAttribute("matchedStyles", matchedStyles);
 	    session.setAttribute("selectedCloth", selectedClothes);
 	    session.removeAttribute("selectedClothes");
+	    session.removeAttribute("selectedFormalityType");
 	    session.removeAttribute("selectedClothesMap");
 
 	    return mav;
@@ -595,22 +589,41 @@ public class StyleController {
 	        return new ModelAndView("redirect:/logout");
 	    }
 	    
-	    // รับ clothingId ที่ต้องการกรอง (ถ้ามี)
-	    String filterClothingId = request.getParameter("id");
-
+	    // ดึงข้อมูลทั้งหมดจาก Session
 	    List<MatchStyle> allMatchedStyles = (List<MatchStyle>) session.getAttribute("matchedStyles");
 	    List<ClothingItem> selectedClothes = (List<ClothingItem>) session.getAttribute("selectedCloth");
 	    
 	    if (allMatchedStyles == null || selectedClothes == null) {
-	        return new ModelAndView("redirect:/matchstyles_page");
+	        // ถ้าไม่มีข้อมูลพื้นฐาน ให้กลับไปหน้าเลือกชุด
+	        return new ModelAndView("redirect:/matchstyles");
 	    }
+
+	    // --- ส่วนที่เพิ่มเข้ามา ---
+	    // 1. ดึงรายการโปรดทั้งหมดของผู้ใช้จากฐานข้อมูล
+	    StyleManager sm = new StyleManager();
+	    List<MatchStyle> favoriteStyles = sm.listFavoriteStylesByEmail(user.getEmail());
+
+	    // 2. สร้าง List ใหม่เพื่อเก็บเฉพาะชุดที่ "ยังไม่เป็น Favorite"
+	    List<MatchStyle> nonFavoriteMatchedStyles = new ArrayList<>();
+	    for (MatchStyle style : allMatchedStyles) {
+	        // ใช้ helper method ที่เราสร้างขึ้นเพื่อตรวจสอบ
+	        if (!isStyleInFavoritesList(style, favoriteStyles)) {
+	            nonFavoriteMatchedStyles.add(style);
+	        }
+	    }
+	    // --- จบส่วนที่เพิ่มเข้ามา ---
+
+	    // รับ clothingId ที่ต้องการกรอง (ถ้ามี)
+	    String filterClothingId = request.getParameter("id");
 	    
-	    List<MatchStyle> filteredStyles = new ArrayList<>();
+	    List<MatchStyle> finalStylesToShow; // List สุดท้ายที่จะแสดงผล
 	    
 	    if (filterClothingId != null && !filterClothingId.trim().isEmpty()) {
+	        // ถ้ามีการกรอง ให้กรองจาก List ที่ตัด Favorite ออกไปแล้ว
+	        finalStylesToShow = new ArrayList<>();
 	        Long clothingId = Long.parseLong(filterClothingId);
 	        
-	        for (MatchStyle style : allMatchedStyles) {
+	        for (MatchStyle style : nonFavoriteMatchedStyles) { // <-- ใช้ List ใหม่ที่กรองแล้ว
 	            boolean containsItem = false;
 	            for (ClothingItem item : style.getClothingItems()) {
 	                if (item.getClothid().equals(clothingId)) {
@@ -619,39 +632,61 @@ public class StyleController {
 	                }
 	            }
 	            if (containsItem) {
-	                filteredStyles.add(style);
+	                finalStylesToShow.add(style);
 	            }
 	        }
 	        
-	        // หาเสื้อผ้าที่เลือกเพื่อแสดงใน UI
-	        ClothingItem selectedItem = null;
-	        for (ClothingItem item : selectedClothes) {
-	            if (item.getClothid().equals(clothingId)) {
-	                selectedItem = item;
-	                break;
-	            }
-	        }
-	        
-	        if (selectedItem != null) {
-	            mav.addObject("filterMessage", "แสดงสไตล์ที่มี " + selectedItem.getSubCategory().getCategory().getCategoryName() + 
-	                " (" + selectedItem.getFormalityType().getTypeName() + ")");
-	        }
+	        // (ส่วนของการสร้าง filterMessage เหมือนเดิม)
 	        
 	    } else {
-	        filteredStyles = allMatchedStyles;
+	        // ถ้าไม่มีการกรอง ให้ใช้ List ที่ตัด Favorite ออกไปแล้วทั้งหมด
+	        finalStylesToShow = nonFavoriteMatchedStyles; // <-- ใช้ List ใหม่ที่กรองแล้ว
 	    }
 	    
 	    // ส่งข้อมูลไปยัง view
 	    mav.addObject("selectedClothes", selectedClothes);
-	    mav.addObject("styles", filteredStyles);
-	    mav.addObject("totalStyles", filteredStyles.size());
+	    mav.addObject("styles", finalStylesToShow); // <-- ส่ง List สุดท้ายไป
+	    mav.addObject("totalStyles", finalStylesToShow.size());
 	    mav.addObject("filterClothingId", filterClothingId);
 	    
-	    // เพิ่มข้อมูลสำหรับการแสดงผล
-	    if (filteredStyles.isEmpty() && filterClothingId != null) {
-	        mav.addObject("err_msg", "ไม่พบสไตล์ที่มีเสื้อผ้าชิ้นที่เลือก");
+	    if (finalStylesToShow.isEmpty()) {
+	        mav.addObject("err_msg", "ไม่พบสไตล์ที่แนะนำ หรือคุณอาจบันทึกทั้งหมดเป็นรายการโปรดแล้ว");
 	    }
 
 	    return mav;
+	}
+	
+	/**
+	 * Helper Method: ตรวจสอบว่า style ที่กำหนด มีอยู่ในรายการ favoriteStyles หรือไม่
+	 * โดยเปรียบเทียบจากชุด ID ของเสื้อผ้าข้างใน
+	 */
+	private boolean isStyleInFavoritesList(MatchStyle style, List<MatchStyle> favoriteStyles) {
+	    if (favoriteStyles == null || favoriteStyles.isEmpty()) {
+	        return false;
+	    }
+
+	    // 1. ดึง ID เสื้อผ้าทั้งหมดจาก "style" ที่ต้องการตรวจสอบ แล้วเรียงลำดับ
+	    List<Long> newItemIds = new ArrayList<>();
+	    for (ClothingItem item : style.getClothingItems()) {
+	        newItemIds.add(item.getClothid());
+	    }
+	    Collections.sort(newItemIds);
+
+	    // 2. วนลูปตรวจรายการโปรด (favoriteStyles) ทีละชุด
+	    for (MatchStyle favorite : favoriteStyles) {
+	        // 3. ดึง ID เสื้อผ้าทั้งหมดจาก "ชุดโปรด" แล้วเรียงลำดับ
+	        List<Long> favoriteItemIds = new ArrayList<>();
+	        for (ClothingItem item : favorite.getClothingItems()) {
+	            favoriteItemIds.add(item.getClothid());
+	        }
+	        Collections.sort(favoriteItemIds);
+
+	        // 4. ถ้า ID ทั้งสองชุดเหมือนกันเป๊ะ = เป็นชุดเดียวกัน
+	        if (newItemIds.equals(favoriteItemIds)) {
+	            return true; // เจอชุดซ้ำในรายการโปรด
+	        }
+	    }
+
+	    return false; // ไม่เจอในรายการโปรด
 	}
 }
