@@ -46,8 +46,13 @@
 ---
 
 ## 📁 โครงสร้างโปรเจกต์ (บางส่วน)
-ProjectMVC_WhatToWear/ ├── WhatToWear/ │   └── src/ │       └── main/ │           └── webapp/ │               └── assets/ │                   └── video/
-
+ProjectMVC-WhatToWear/
+├── WhatToWear/
+│   └── src/
+│       └── main/
+│           └── webapp/
+│               └── assets/
+│                   └── video/
 
 ---
 
