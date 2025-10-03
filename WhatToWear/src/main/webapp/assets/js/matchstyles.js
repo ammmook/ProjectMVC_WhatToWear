@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	    // 2. เพิ่ม Event Listener ให้กับทุกปุ่ม
 	    formalityRadios.forEach(function(radio) {
 	        // ใช้ 'change' event เพื่อให้ทำงานเมื่อมีการเปลี่ยนแปลงการเลือก
-	        radio.addEventListener('change', function() {
+	        radio.addEventListener('click', function() {
 	            // 3. ดึงค่า value ของปุ่มที่ถูกเลือก (เช่น 'T01', 'T02')
 	            const selectedTypeId = this.value; 
 	            
@@ -20,11 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	    });
 	}
 
-	/**
-	 * ฟังก์ชันสำหรับสร้าง URL และนำทางไปยัง Controller
-	 */
 	function sendFormalitySelection(typeId, categoryId) {
-	    // ***สำคัญ***: ชื่อพารามิเตอร์ (formality_type) ต้องตรงกับที่ Controller คาดหวัง
 	    window.location.href = `matchstyles?formality_type=${typeId}&id=${categoryId}`;
 	}
 

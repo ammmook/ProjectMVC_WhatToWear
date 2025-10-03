@@ -32,27 +32,21 @@ body {
     top: 20px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 40px); /* ความสูงเกือบเต็มจอ */
-}
-
-.style-selection {
-    flex-grow: 1; /* ดันให้ปุ่มอยู่ด้านล่างสุด */
+    /*height: calc(100vh - 40px); */
 }
 
 /* Header Styles */
 .page-title {
-    text-align: center;
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 30px;
-    color: #333;
-    padding-top: 20px;
+	font-size: 24px;
+	font-weight: 600;
+	margin-bottom: 20px;
+	color: #111827;
 }
 
 .selection-title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 500;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 /* Category Tabs */
@@ -155,7 +149,7 @@ body {
     border: 1px solid #dee2e6;
     border-radius: 8px;
     padding: 20px;  
-    height: calc(100vh - 150px);
+    height: calc(80vh - 100px);
     overflow-y: auto;
 }
 
@@ -233,7 +227,7 @@ body {
 .style-options {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 30px;
 }
 
@@ -245,7 +239,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     cursor: pointer;
@@ -255,7 +249,7 @@ body {
 
 .style-icon {
     font-size: 24px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     color: #666;
 }
 
@@ -274,8 +268,8 @@ body {
     display: flex;
     flex-direction: column; /* Stack buttons vertically */
     gap: 15px;
-    margin-top: auto; /* Push to the bottom */
-    padding-top: 20px; /* Add some space above */
+    margin-top: 73px; /* Push to the bottom */
+    padding-top: 20px; /* Add some space above - ปรับจาก 5px เป็น 20px */
 }
 
 .btn {

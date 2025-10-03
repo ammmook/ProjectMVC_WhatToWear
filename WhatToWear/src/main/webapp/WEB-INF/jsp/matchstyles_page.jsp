@@ -11,7 +11,7 @@
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.0.0/uicons-regular-straight/css/uicons-regular-straight.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.6.0/uicons-solid-straight/css/uicons-solid-straight.css'>
 	<link rel="stylesheet" href="sweetalert2.min.css">
-	<link rel="stylesheet" href="assets/css/matchstyles_styles.css?v=1.0">
+	<link rel="stylesheet" href="assets/css/matchstyles_styles.css">
 </head>
 <body>
     <%@ include file="header.jsp"%>
@@ -25,7 +25,7 @@
 			    <div class="layout-container">
 			        <div class="left-column">
 			            <div class="style-selection">
-			                <h2 class="selection-title">เลือกรูปแบบการแต่งกาย</h2>
+			                <h4 class="selection-title">เลือกรูปแบบการแต่งกาย</h4>
 			                <div class="style-options">
 			                    <div class="style-option">
 			                         <input type="radio" name="formality_type" id="formal" value="T01" ${selectedFormalityType == 'T01' ? 'checked' : ''}>
@@ -64,7 +64,7 @@
 			        </div>
 			
 			        <div class="right-column">
-			            <h2 class="selection-title">เลือกเสื้อผ้าของคุณ</h2>
+			            <h4 class="selection-title">เลือกเสื้อผ้าของคุณ</h4>
 			            <div class="category-tabs">
 			                 <div class="tab ${selectedCates == 'CG001' ? 'selected' : ''}">
 						        <a href="matchstyles?id=CG001" class="tab-category">

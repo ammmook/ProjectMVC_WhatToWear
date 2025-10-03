@@ -239,14 +239,26 @@ public class StyleController {
 	    mav.addObject("selectedFormalityType", finalFormalityType); 
 
 	    StyleManager sm = new StyleManager();
+	    
 	    List<ClothingItem> clothes = sm.getClothingByCategory(user.getEmail(), categoryId);
-
+	    
+	    if (finalFormalityType != null && finalFormalityType.equals("T01")) {
+	        if (clothes != null && !clothes.isEmpty()) {
+	            List<ClothingItem> filteredClothes = new ArrayList<>();
+	            for (ClothingItem item : clothes) {
+	                if ("T01".equals(item.getFormalityType().getTypeId())) {
+	                    filteredClothes.add(item);
+	                }
+	            }
+	            clothes = filteredClothes;
+	        }
+	    }
+	    
 	    if (clothes == null || clothes.isEmpty()) {
 	        mav.addObject("err_msg", "คุณยังไม่มีเสื้อผ้าในหมวดหมู่นี้");
 	    } else {
 	        mav.addObject("clothes", clothes);
 	    }
-
 	    return mav;
 	}
 
@@ -286,12 +298,25 @@ public class StyleController {
 	    String[] selectedClothesIds = allSelectedClothesIds.toArray(new String[0]);
 	    boolean hasSelectedClothes = (selectedClothesIds != null && selectedClothesIds.length > 0);
 
-	    // --- 2. ดึงข้อมูลเสื้อผ้าทั้งหมดและจัดกลุ่ม ---
 	    ClothingManager cm = new ClothingManager();
 	    List<ClothingItem> allUserClothes = cm.getClothesByEmail(user.getEmail());
-	    List<ClothingItem> selectedClothes = hasSelectedClothes
-	            ? cm.getClothingItemsByIds(selectedClothesIds, user.getEmail())
-	            : allUserClothes;
+	    List<ClothingItem> selectedClothes;
+	    if (hasSelectedClothes) {
+	        selectedClothes = cm.getClothingItemsByIds(selectedClothesIds, user.getEmail());
+	    } else {
+	        String formalityTypeId = request.getParameter("formality_type");
+	        
+	        if ("T01".equals(formalityTypeId)) {
+	            selectedClothes = new ArrayList<>();
+	            for (ClothingItem item : allUserClothes) {
+	                if ("T01".equals(item.getFormalityType().getTypeId())) {
+	                    selectedClothes.add(item);
+	                }
+	            }
+	        } else {
+	            selectedClothes = allUserClothes;
+	        }
+	    }
 	    
 	    // ใช้เมธอด classifyClothes เพื่อจัดกลุ่มเสื้อผ้าทั้งหมดและที่เลือกไว้
 	    Map<String, List<ClothingItem>> allClothesByType = classifyClothes(allUserClothes);
@@ -595,16 +620,12 @@ public class StyleController {
 	    List<ClothingItem> selectedClothes = (List<ClothingItem>) session.getAttribute("selectedCloth");
 	    
 	    if (allMatchedStyles == null || selectedClothes == null) {
-	        // ถ้าไม่มีข้อมูลพื้นฐาน ให้กลับไปหน้าเลือกชุด
 	        return new ModelAndView("redirect:/matchstyles");
 	    }
-
-	    // --- ส่วนที่เพิ่มเข้ามา ---
-	    // 1. ดึงรายการโปรดทั้งหมดของผู้ใช้จากฐานข้อมูล
+	    
 	    StyleManager sm = new StyleManager();
 	    List<MatchStyle> favoriteStyles = sm.listFavoriteStylesByEmail(user.getEmail());
 
-	    // 2. สร้าง List ใหม่เพื่อเก็บเฉพาะชุดที่ "ยังไม่เป็น Favorite"
 	    List<MatchStyle> nonFavoriteMatchedStyles = new ArrayList<>();
 	    for (MatchStyle style : allMatchedStyles) {
 	        // ใช้ helper method ที่เราสร้างขึ้นเพื่อตรวจสอบ
@@ -612,9 +633,6 @@ public class StyleController {
 	            nonFavoriteMatchedStyles.add(style);
 	        }
 	    }
-	    // --- จบส่วนที่เพิ่มเข้ามา ---
-
-	    // รับ clothingId ที่ต้องการกรอง (ถ้ามี)
 	    String filterClothingId = request.getParameter("id");
 	    
 	    List<MatchStyle> finalStylesToShow; // List สุดท้ายที่จะแสดงผล
@@ -636,15 +654,11 @@ public class StyleController {
 	                finalStylesToShow.add(style);
 	            }
 	        }
-	        
-	        // (ส่วนของการสร้าง filterMessage เหมือนเดิม)
-	        
 	    } else {
 	        // ถ้าไม่มีการกรอง ให้ใช้ List ที่ตัด Favorite ออกไปแล้วทั้งหมด
 	        finalStylesToShow = nonFavoriteMatchedStyles; // <-- ใช้ List ใหม่ที่กรองแล้ว
 	    }
 	    
-	    // ส่งข้อมูลไปยัง view
 	    mav.addObject("selectedClothes", selectedClothes);
 	    mav.addObject("styles", finalStylesToShow); // <-- ส่ง List สุดท้ายไป
 	    mav.addObject("totalStyles", finalStylesToShow.size());
